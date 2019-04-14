@@ -2,14 +2,16 @@ import requests
 import json
 import re
 from bs4 import BeautifulSoup
-from config import parse_config
+import sys
+sys.path.append(".")
+from config.config import parse_config
 
 class scrape():
     def __init__(self):
         """
         Initialize class - load config options, urls, and create requests session
         """
-        self.urls = parse_config("urls")
+        self.urls = parse_config("export_urls")
         # self.config = parse_config("config")
         self.session = requests.Session()
         
@@ -33,7 +35,7 @@ class scrape():
             topic_urls = page_soup.find_all("a", {"class":"topic-title"})
             for url in topic_urls:
                 true_url="https://grupy.jeja.pl"+url["href"]
-                if true_url not in set(self.urls["ignore_urls"]+self.urls["kp_urls"]):
+                if true_url not in set(self.urls["ignore_urls"]+[self.urls["kp_url"]]):
                     self.urls["topics"].append({})
                     self.urls["topics"][tid]["url"] = true_url
                     topic_title = url.contents[-1]
@@ -75,6 +77,21 @@ class scrape():
                 self.urls["topics"][tid]["posts"][pid]["content"] = post_content
                 pid+=1
         return self.urls
+    def get_character_sheet_template(self):
+        self.urls["character_sheet_template"] = {
+            "title":"Wzór karty postaci",
+            "content":""
+        }
+
+        page = self.session.get(self.urls["kp_url"])
+        page_soup = BeautifulSoup(page.text, "html.parser")
+        first_post = page_soup.find("div", {"class":"komentarz kom-mar"})
+        post_contents = first_post.find("div", {"class":"text"})
+        post_content = ""
+        for content in post_contents:
+            post_content += str(content)
+        post_content = self.jeja_to_markdown(post_content)
+        self.urls["character_sheet_template"]["content"] = post_content
 
     def get_page_count(self, soup):
         pages = soup.find_all("a", {"class":"pagination-number"})
@@ -85,18 +102,17 @@ class scrape():
             max_page_number = 1
         return(max_page_number)
 
-
-
     def export(self):
         self.get_topic_urls()
         self.get_all_posts()
-        return self.urls
+        self.get_character_sheet_template()
+        return {"topics":self.urls["topics"], "character_sheet_template":self.urls["character_sheet_template"]}
+
     def export_to_file(self, filename):
         with open(filename, "w") as f:
             json.dump(self.export(), f, indent=2)
 
     def jeja_to_markdown(self, text):
-        
         text = text.replace("<strong>", "**").replace("</strong>", "**")
         text = text.replace("<b>", "**").replace("</b>", "**")
         text = text.replace("<em>", "*").replace("</em>", "*")
@@ -110,4 +126,4 @@ class scrape():
 
 if __name__=="__main__":
     a = scrape()
-    a.export_to_file("result.json")
+    a.export_to_file("export_result.json")
