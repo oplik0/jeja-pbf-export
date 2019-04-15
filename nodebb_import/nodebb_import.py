@@ -29,7 +29,7 @@ class nodebb_import():
                 self.tids.append(response["payload"]["topicData"]["tid"])
             else:
                 raise RuntimeError("Error "+response["code"]+"\n"+str(response))
-            sleep(0.5)
+            sleep(0.01)
 
     def import_posts(self):
         for i, tid in enumerate(self.tids):
@@ -37,7 +37,7 @@ class nodebb_import():
             for post in posts[1:]:
                 data = {"_uid":self.config["_uid"], "content":self.parse_post(post)}
                 self.session.post(self.urls["forum_url"]+"/api/v2/topics/"+str(tid), data=data, headers=self.headers)
-                sleep(0.5)
+                sleep(0.01)
     def parse_post(self, post):
         post["content"] = post["content"].replace("\n", "\n> ")
         content = """#### ![avatar {0}]({1}) %(#344576)[{0}]
