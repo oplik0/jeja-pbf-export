@@ -83,7 +83,7 @@ class scrape():
             "content":""
         }
 
-        page = self.session.get(self.urls["kp_url"])
+        page = self.session.get(self.urls["character_sheet_url"])
         page_soup = BeautifulSoup(page.text, "html.parser")
         first_post = page_soup.find("div", {"class":"komentarz kom-mar"})
         post_contents = first_post.find("div", {"class":"text"})
