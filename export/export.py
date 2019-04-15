@@ -118,7 +118,7 @@ class scrape():
         text = text.replace("<em>", "*").replace("</em>", "*")
         text = text.replace("<s>", "~~").replace("</s>", "~~")
         text = text.replace("<br/>", "")
-        text = text.replace('blockquote class="quote">', "\n> ").replace("</blockquote>", "") # nesting quotes!
+        text = text.replace('<blockquote class="quote">', "\n> ").replace("</blockquote>", "\n") # nesting quotes!
         text = text.replace("-", "‐") #replacing hypen-minus (U+002D) with hypen (U+2010)
         text = re.sub(r'\<a .*href\=\"(\S+)\"[^>]*\>(.*)\<\/a\>', r'[\2](\1)', text)
         text = re.sub(r'\<img.*src\=\"([^>"]*)\"[^>]*\>', r'![image](\1)', text)
