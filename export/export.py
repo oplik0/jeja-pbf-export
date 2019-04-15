@@ -35,7 +35,7 @@ class scrape():
             topic_urls = page_soup.find_all("a", {"class":"topic-title"})
             for url in topic_urls:
                 true_url="https://grupy.jeja.pl"+url["href"]
-                if true_url not in set(self.urls["ignore_urls"]+[self.urls["kp_url"]]):
+                if true_url not in set(self.urls["ignore_urls"]+[self.urls["character_sheet_url"]]):
                     self.urls["topics"].append({})
                     self.urls["topics"][tid]["url"] = true_url
                     topic_title = url.contents[-1]
@@ -64,9 +64,9 @@ class scrape():
                 self.urls["topics"][tid]["posts"].append({})
                 nick_div = post.find("div", {"class":"nick"})
                 try:
-                    self.urls["topics"][tid]["posts"][pid]["username"] = nick_div.find("a").contents[0]
+                    self.urls["topics"][tid]["posts"][pid]["username"] = nick_div.find("a").contents[0].replace("\n", "").replace("\t", "")
                 except AttributeError:
-                    self.urls["topics"][tid]["posts"][pid]["username"] = nick_div.contents[0]
+                    self.urls["topics"][tid]["posts"][pid]["username"] = nick_div.contents[0].replace("\n", "").replace("\t", "")
                 self.urls["topics"][tid]["posts"][pid]["avatar"] = post.find("img", {"class":"komentarz-foto"})["src"].replace("90x90", "small")
                 post_contents = post.find("div", {"class":"text"})
                 post_content = ""
@@ -118,7 +118,8 @@ class scrape():
         text = text.replace("<em>", "*").replace("</em>", "*")
         text = text.replace("<s>", "~~").replace("</s>", "~~")
         text = text.replace("<br/>", "")
-        text = text.replace('blockquote class="quote">', ">").replace("</blockquote>", "")
+        text = text.replace('blockquote class="quote">', "\n> ").replace("</blockquote>", "") # nesting quotes!
+        text = text.replace("-", "‐") #replacing hypen-minus (U+002D) with hypen (U+2010)
         text = re.sub(r'\<a .*href\=\"(\S+)\"[^>]*\>(.*)\<\/a\>', r'[\2](\1)', text)
         text = re.sub(r'\<img.*src\=\"([^>"]*)\"[^>]*\>', r'![image](\1)', text)
         text = re.sub(r'\<iframe.*src\=\"\/\/www\.youtube\.com\/embed\/([\S]+)\"[^>]*\>\<\/iframe\>', r'https://youtu.be/\1', text)
