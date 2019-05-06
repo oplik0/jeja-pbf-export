@@ -16,6 +16,32 @@ class nodebb_import():
         self.session = requests.Session()
         self.headers = {"Authorization":"Bearer {}".format(self.config["token"])}
         self.tids = []
+        if self.urls["create_new"]:
+            self.create_user()
+            self.create_categories()
+    def create_user(self):
+        data = {"username":self.urls["PBF_name"], "_uid":1}
+        response = self.session.post(self.urls["forum_url"]+"/api/v2/users", data=data, headers=self.headers)
+        self.config["_uid"] = response.json()['payload']['uid']
+        self.session.put(self.urls["forum_url"]+"/api/v2/groups/PBF/membership/{}".format(self.config["_uid"]), data={"_uid":1}, headers=self.headers)
+        self.session.post(self.urls["forum_url"]+"/api/v2/groups/", data = {"name":"Mistrzowie Gry {}".format(self.urls["PBF_name"]), "ownerUid":self.config["_uid"], "_uid":1})
+
+    def create_categories(self):
+        data = {"name":self.urls["PBF_name"], "_uid":1}
+        response = self.session.post(self.urls["forum_url"]+"/api/v2/categories", data=data, headers=self.headers)
+        top_cid = response.json()['payload']['cid']
+        names = ["Karty Postaci", "Czat", "Najważniejsze Informacje", "Lokacje"]
+        data["parentCid"] = top_cid
+        for name in names:
+            data["name"] = name
+            response = self.session.post(self.urls["forum_url"]+"/api/v2/categories", data=data, headers=self.headers)
+            if name == "Karty Postaci":
+                self.urls["character_sheet_category_id"] = response['payload']['cid']
+            elif name == "Lokacje":
+                self.urls["post_category_id"] = response['payload']['cid']
+            elif name == "Czat":
+                cid = response.json()['payload']['cid']
+                self.session.post(self.urls["forum_url"]+"/api/v2/topics", data={"cid":cid, "title":"Czat", "content":"Miejsce do pisania o wszystkim i o niczym"}, headers=self.headers)
 
     def import_topics(self):
         for topic in self.data["topics"]:
