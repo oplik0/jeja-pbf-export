@@ -16,7 +16,7 @@ class nodebb_import():
         self.session = requests.Session()
         self.headers = {"Authorization":"Bearer {}".format(self.config["token"])}
         self.tids = []
-        if self.urls["create_new"]:
+        if self.config["create_new"]:
             self.create_user()
             self.create_categories()
     def create_user(self):
