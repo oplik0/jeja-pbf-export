@@ -60,7 +60,7 @@ class nodebb_import():
             sleep(0.01)
     def import_posts(self):
         for i, tid in reversed(list(enumerate(self.tids))):
-            posts = self.data["topics"][i)]["posts"]
+            posts = self.data["topics"][i]["posts"]
             for post in posts[1:]:
                 data = {"_uid":self.config["_uid"], "content":self.parse_post(post)}
                 self.session.post(self.urls["forum_url"]+"/api/v2/topics/"+str(tid), data=data, headers=self.headers)
