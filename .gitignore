@@ -330,6 +330,7 @@ ASALocalRun/
 .mfractor/
 
 
+export_result.json
 
 result.json
 results.json
