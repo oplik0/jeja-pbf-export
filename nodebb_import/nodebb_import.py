@@ -23,11 +23,10 @@ class nodebb_import():
         data = {"username":self.urls["PBF_name"], "_uid":1}
         response = self.session.post(self.urls["forum_url"]+"/api/v2/users", data=data, headers=self.headers)
         self.config["_uid"] = response.json()['payload']['uid']
-        input("confirm email")
-        self.session.put(self.urls["forum_url"]+"/api/v2/groups/PBF/membership/{}".format(self.config["_uid"]), data={"_uid":1}, headers=self.headers)
+        input("potwierdz konto")
+        self.session.put(self.urls["forum_url"]+"/api/v2/groups/pbf/membership/{}".format(self.config["_uid"]), data={"_uid":1}, headers=self.headers)
         self.session.post(self.urls["forum_url"]+"/api/v2/groups/", data = {"name":"Mistrzowie Gry {}".format(self.urls["PBF_name"]), "ownerUid":self.config["_uid"], "_uid":1})
         sleep(1)
-
     def create_categories(self):
         data = {"name":self.urls["PBF_name"], "_uid":1}
         response = self.session.post(self.urls["forum_url"]+"/api/v2/categories", data=data, headers=self.headers)
@@ -38,9 +37,9 @@ class nodebb_import():
             data["name"] = name
             response = self.session.post(self.urls["forum_url"]+"/api/v2/categories", data=data, headers=self.headers)
             if name == "Karty Postaci":
-                self.urls["character_sheet_category_id"] = response['payload']['cid']
+                self.urls["character_sheet_category_id"] = response.json()['payload']['cid']
             elif name == "Lokacje":
-                self.urls["post_category_id"] = response['payload']['cid']
+                self.urls["post_category_id"] = response.json()['payload']['cid']
             elif name == "Czat":
                 cid = response.json()['payload']['cid']
                 self.session.post(self.urls["forum_url"]+"/api/v2/topics", data={"cid":cid, "title":"Czat", "content":"Miejsce do pisania o wszystkim i o niczym"}, headers=self.headers)
